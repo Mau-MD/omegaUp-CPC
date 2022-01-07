@@ -99,7 +99,9 @@ def save_source_code(runs, problem_alias):
             elif language.startswith("c"):
                 extension = ".c"
 
-            file_name = f"{idx}_{run['verdict']}_{score}{extension}"
+            file_name = (
+                f"{idx}_{username}_{problem_alias}_{run['verdict']}_{score}{extension}"
+            )
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(run["source"])
 
