@@ -7,6 +7,39 @@ import mosspy
 
 from util import get_credentials_from_file, print_table, path_exists
 
+omegaup_lang_extension = {
+    "c11-clang": ".c",
+    "c11-gcc": ".c",
+    "cpp11-clang": ".cpp",
+    "cpp11-gcc": ".cpp",
+    "cpp17-clang": ".cpp",
+    "cpp17-gcc": ".cpp",
+    "java": ".java",
+    "kj": ".java",
+    "kp": ".pascal",
+    "py2": ".py",
+    "py3": ".py",
+}
+
+lang_extension_to_moss = {
+    ".c": "c",
+    ".cpp": "cc",
+    ".py": "python",
+    ".java": "java",
+    ".pascal": "pascal",
+    ".txt": "ascii"
+}
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -56,7 +89,7 @@ def display_contest_problems(contest_class, contest_alias):
 def get_runs_from_problem(contest_class, run_class, contest_alias, problem_alias):
     runs = contest_class.runs(contest_alias=contest_alias, problem_alias=problem_alias)
 
-    print("\n Getting runs from problem: " + problem_alias)
+    print(bcolors.BOLD + "\n Getting runs from problem: " + problem_alias + bcolors.ENDC)
     # separate runs by username
     runs_by_username = {}
     for run in runs["runs"]:
@@ -82,88 +115,63 @@ def get_source_from_run(run_class, run_alias):
 
 
 def save_source_code(runs, problem_alias):
-
     print("\nSaving source code locally...")
+
     for username, runs_by_username in runs.items():
         path = os.path.join("generated", problem_alias, username)
         if not path_exists(path):
             os.mkdir(path)
-
+        
         runs_by_username.reverse()  # reverse to get the latest run first
         for idx, run in enumerate(runs_by_username):
-
             language = run["language"]
             score = math.floor(run["score"] * 100)
             extension = ".txt"
 
-            if language.startswith("cpp"):
-                extension = ".cpp"
-            elif language.startswith("py3") or language.startswith("py2"):
-                extension = ".py"
-            elif language.startswith("java"):
-                extension = ".java"
-            elif language.startswith("c"):
-                extension = ".c"
+            for lang, ext in omegaup_lang_extension.items():
+                if language.startswith(lang):
+                    extension = ext
 
             file_name = (
                 f"{idx}_{username}_{problem_alias}_{run['verdict']}_{score}{extension}"
             )
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(run["source"])
+
     print("Problems saved! Please check the generated folder")
 
 
 def check_plagiarism(moss_user_id, problem_alias):
 
-    language_idx = int(
-        input(
-            "\nSelect a language to check for plagiarism: 1)C++ 2)Python 3)Java 4)C\n"
-        )
-    )
-
-    language = "cc"
-    language_extension = ".cpp"
-
-    if language_idx == 1:
-        language = "cc"
-        language_extension = ".cpp"
-    elif language_idx == 2:
-        language = "python"
-        language_extension = ".py"
-    elif language_idx == 3:
-        language = "java"
-        language_extension = ".java"
-    elif language_idx == 4:
-        language = "c"
-        language_extension = ".c"
-
     print("Sending information to Moss. Please be patient...")
 
-    m = mosspy.Moss(moss_user_id, language)  # TODO change between languages
-    m.addFilesByWildcard(
-        os.path.join("generated", problem_alias, "*", f"*{language_extension}")
-    )
+    for ext, moss_lang in lang_extension_to_moss.items():
+        m = mosspy.Moss(moss_user_id, moss_lang)
+        m.addFilesByWildcard(os.path.join("generated", problem_alias, "*", f"*{ext}"))
 
-    url = m.send(lambda file_path, display_name: print("*", end="", flush=True))
-    print()
+        if(len(m.files) == 0):
+            continue
 
-    print("Unfiltered Online Report (May contain duplicates): " + url)
+        url = m.send(lambda file_path, display_name: print("*", end="", flush=True))
 
-    if not path_exists("submission"):
-        os.mkdir("submission")
+        print()
+        print(bcolors.OKGREEN + "OK: " + moss_lang + bcolors.ENDC)
+        print("Unfiltered Online Report (May contain duplicates): " + bcolors.OKCYAN + url + bcolors.ENDC)
 
-    # Save report file
-    report_path = os.path.join(
-        "submission", f"{problem_alias}_{language}_unfiltered_report.html"
-    )
-    filtered_report_path = os.path.join(
-        "submission", f"{problem_alias}_{language}_filtered_report.html"
-    )
-    print("The unfiltered report has been saved locally inside: ", report_path)
-    m.saveWebPage(url, report_path)
-    return report_path, filtered_report_path
+        if not path_exists("submission"):
+            os.mkdir("submission")
 
-    # TODO: generate own html deleting same user matches
+        # Save report file
+        report_path = os.path.join(
+            "submission", f"{problem_alias}_{moss_lang}_unfiltered_report.html"
+        )
+        filtered_report_path = os.path.join(
+            "submission", f"{problem_alias}_{moss_lang}_filtered_report.html"
+        )
+        print("The unfiltered report has been saved locally inside: ", report_path)
+        m.saveWebPage(url, report_path)
+        remove_same_user_matches(report_path, filtered_report_path, problem_alias) 
+        # TODO: integrate all languages responses into same HTML problem
 
 
 def remove_same_user_matches(report_path, filtered_report_path, problem_alias):
@@ -217,11 +225,10 @@ def main():
         if not path_exists("generated", problem_alias):
             os.mkdir(os.path.join("generated", problem_alias))
         save_source_code(runs, problem_alias)
-        report_path, filtered_report_path = check_plagiarism(
+        check_plagiarism(
             moss_user_id, problem_alias
         )
-        remove_same_user_matches(report_path, filtered_report_path, problem_alias)
-
+        
 
 if __name__ == "__main__":
     main()
