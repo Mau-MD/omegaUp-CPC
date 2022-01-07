@@ -1,7 +1,9 @@
+# python
 __pycache__
 
+# personal info
 login.txt
 
+# generated directories
 generated
-
-moss
+submission

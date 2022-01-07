@@ -1,5 +1,7 @@
 import os.path
 
+from mosspy import moss
+
 
 def get_credentials_from_file(file_name: str):
     """
@@ -9,13 +11,18 @@ def get_credentials_from_file(file_name: str):
         with open("login.txt", "r") as f:
             username = f.readline().strip()
             password = f.readline().strip()
+            moss_user_id = f.readline().strip()
     else:
         username = input("Username: ")
         password = input("Password: ")
+        moss_user_id = input(
+            "Moss User ID: (If you don't have one, please visit https://theory.stanford.edu/~aiken/moss/)"
+        )
         with open(file_name, "w") as f:
             f.write(username + "\n")
             f.write(password + "\n")
-    return username, password
+            f.write(moss_user_id + "\n")
+    return username, password, moss_user_id
 
 
 def print_table(rows: list[str]):

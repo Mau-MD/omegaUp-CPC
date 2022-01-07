@@ -3,8 +3,10 @@ import omegaup.api
 import sys
 import os
 import math
+import mosspy
 
 from util import get_credentials_from_file, print_table, path_exists
+
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -82,14 +84,12 @@ def save_source_code(runs, problem_alias):
         if not path_exists(path):
             os.mkdir(path)
 
-        runs_by_username.reverse()
-        for idx, run in enumerate(
-            runs_by_username
-        ):  # reverse to get the latest run first
+        runs_by_username.reverse()  # reverse to get the latest run first
+        for idx, run in enumerate(runs_by_username):
 
-            extension = ".txt"
             language = run["language"]
             score = math.floor(run["score"] * 100)
+            extension = ".txt"
 
             if language.startswith("cpp"):
                 extension = ".cpp"
@@ -107,9 +107,29 @@ def save_source_code(runs, problem_alias):
                 f.write(run["source"])
 
 
+def check_plagiarism(moss_user_id, problem_alias):
+    m = mosspy.Moss(moss_user_id, "cc")
+    m.addFilesByWildcard(os.path.join("generated", problem_alias, "*", "*.cpp"))
+
+    url = m.send(lambda file_path, display_name: print("*", end="", flush=True))
+    print()
+
+    print("Generated Report: " + url)
+
+    if not path_exists("submission"):
+        os.mkdir("submission")
+
+    # Save report file
+    report_path = os.path.join("submission", f"{problem_alias}.html")
+    print("The report has been saved locally inside: ", report_path)
+    m.saveWebPage(url, report_path)
+
+    # TODO: generate own html deleting same user matches
+
+
 def main():
 
-    username, password = get_credentials_from_file("login.txt")
+    username, password, moss_user_id = get_credentials_from_file("login.txt")
 
     client_class = omegaup.api.Client(username=username, password=password)
     contest_class = omegaup.api.Contest(client=client_class)
@@ -126,6 +146,7 @@ def main():
         if not path_exists("generated", problem_alias):
             os.mkdir(os.path.join("generated", problem_alias))
         save_source_code(runs, problem_alias)
+        check_plagiarism(moss_user_id, problem_alias)
     print("Problems saved! Please check the generated folder")
 
 
