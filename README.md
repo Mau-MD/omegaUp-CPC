@@ -26,4 +26,4 @@ A continuación sigue las instrucciones.
 
 ## Progreso
 
-Actualmente la herramienta solo puede descargar los codigos de un concurso y agregarlo en carpetas. Se busca que se utilice la API de Moss para poder generar un reporte de plagio dentro de un futuro.
+El código descarga todos los runs hechos por los usuarios de un concurso y los acomoda por carpetas, luego utiliza el servicio de `Moss` para detectar plagio (solo archivos `cpp` por el momento). Actualmente realiza el analisis a absolutamente todos los archivos sin excepciones, es decir puede que el programa marque plagio entre dos archivos que subio el mismo usuario. Se busca proximamente evitar este comportamiento
