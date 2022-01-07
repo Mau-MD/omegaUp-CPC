@@ -13,6 +13,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 def display_admin_contests(contest_class):
     contests = contest_class.adminList()
+    # contests = contest_class.list(page=0, page_size=10, query="2")
 
     columns = []
     for idx, contest in enumerate(contests["contests"]):
@@ -55,6 +56,7 @@ def display_contest_problems(contest_class, contest_alias):
 def get_runs_from_problem(contest_class, run_class, contest_alias, problem_alias):
     runs = contest_class.runs(contest_alias=contest_alias, problem_alias=problem_alias)
 
+    print("\n Getting runs from problem: " + problem_alias)
     # separate runs by username
     runs_by_username = {}
     for run in runs["runs"]:
@@ -70,6 +72,7 @@ def get_runs_from_problem(contest_class, run_class, contest_alias, problem_alias
                 "source": get_source_from_run(run_class, run["guid"]),
             }
         )
+    print("Done")
     return runs_by_username
 
 
@@ -79,6 +82,8 @@ def get_source_from_run(run_class, run_alias):
 
 
 def save_source_code(runs, problem_alias):
+
+    print("\nSaving source code locally...")
     for username, runs_by_username in runs.items():
         path = os.path.join("generated", problem_alias, username)
         if not path_exists(path):
@@ -105,26 +110,92 @@ def save_source_code(runs, problem_alias):
             )
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(run["source"])
+    print("Problems saved! Please check the generated folder")
 
 
 def check_plagiarism(moss_user_id, problem_alias):
-    m = mosspy.Moss(moss_user_id, "cc")
-    m.addFilesByWildcard(os.path.join("generated", problem_alias, "*", "*.cpp"))
+
+    language_idx = int(
+        input(
+            "\nSelect a language to check for plagiarism: 1)C++ 2)Python 3)Java 4)C\n"
+        )
+    )
+
+    language = "cc"
+    language_extension = ".cpp"
+
+    if language_idx == 1:
+        language = "cc"
+        language_extension = ".cpp"
+    elif language_idx == 2:
+        language = "python"
+        language_extension = ".py"
+    elif language_idx == 3:
+        language = "java"
+        language_extension = ".java"
+    elif language_idx == 4:
+        language = "c"
+        language_extension = ".c"
+
+    print("Sending information to Moss. Please be patient...")
+
+    m = mosspy.Moss(moss_user_id, language)  # TODO change between languages
+    m.addFilesByWildcard(
+        os.path.join("generated", problem_alias, "*", f"*{language_extension}")
+    )
 
     url = m.send(lambda file_path, display_name: print("*", end="", flush=True))
     print()
 
-    print("Generated Report: " + url)
+    print("Unfiltered Online Report (May contain duplicates): " + url)
 
     if not path_exists("submission"):
         os.mkdir("submission")
 
     # Save report file
-    report_path = os.path.join("submission", f"{problem_alias}.html")
-    print("The report has been saved locally inside: ", report_path)
+    report_path = os.path.join(
+        "submission", f"{problem_alias}_{language}_unfiltered_report.html"
+    )
+    filtered_report_path = os.path.join(
+        "submission", f"{problem_alias}_{language}_filtered_report.html"
+    )
+    print("The unfiltered report has been saved locally inside: ", report_path)
     m.saveWebPage(url, report_path)
+    return report_path, filtered_report_path
 
     # TODO: generate own html deleting same user matches
+
+
+def remove_same_user_matches(report_path, filtered_report_path, problem_alias):
+    with open(report_path, "r") as f:
+        lines = f.readlines()
+
+    with open(filtered_report_path, "w") as f:
+        idx = 0
+        while idx < len(lines) - 2:
+            line = lines[idx]
+            next_line = lines[idx + 1]
+            if line.startswith("<TR><TD>"):
+                first_line_user = get_user_from_html_line(line, problem_alias)
+                second_line_user = get_user_from_html_line(next_line, problem_alias)
+                if first_line_user != second_line_user:
+                    f.write(line)
+                    f.write(next_line)
+                    f.write(lines[idx + 2])  # align table line
+                idx += 2
+            else:
+                f.write(line)
+            idx += 1
+    print(
+        "--- The filtered report has been saved locally inside: ", filtered_report_path
+    )
+
+
+def get_user_from_html_line(line, problem_alias) -> str:
+    search_index = line.index(problem_alias) + len(problem_alias) + 1
+    # Now find the user
+    user_index = line.index("/", search_index)
+    return line[search_index:user_index]
 
 
 def main():
@@ -146,8 +217,10 @@ def main():
         if not path_exists("generated", problem_alias):
             os.mkdir(os.path.join("generated", problem_alias))
         save_source_code(runs, problem_alias)
-        check_plagiarism(moss_user_id, problem_alias)
-    print("Problems saved! Please check the generated folder")
+        report_path, filtered_report_path = check_plagiarism(
+            moss_user_id, problem_alias
+        )
+        remove_same_user_matches(report_path, filtered_report_path, problem_alias)
 
 
 if __name__ == "__main__":
