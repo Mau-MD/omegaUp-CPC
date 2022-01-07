@@ -25,5 +25,4 @@ A continuación sigue las instrucciones.
 **Solo puedes ver los concursos en los que eres admin/creador**
 
 ## Progreso
-
-El código descarga todos los runs hechos por los usuarios de un concurso y los acomoda por carpetas, luego utiliza el servicio de `Moss` para detectar plagio (solo archivos `cpp` por el momento). Actualmente realiza el analisis a absolutamente todos los archivos sin excepciones, es decir puede que el programa marque plagio entre dos archivos que subio el mismo usuario. Se busca proximamente evitar este comportamiento
+El programa ahorita es totalmente funcional y puedes ver el reporte generado en html:)
