@@ -1,6 +1,6 @@
 # omegaUp Code Plagiarism Check
 
-Esta es una herramienta que permite checar el plagio de código dentro de un concurso mediante la herramienta de `Moss` (WIP)
+Esta es una herramienta que permite checar el plagio de código dentro de un concurso mediante la herramienta de `Moss`
 
 ## Uso
 
