@@ -16,7 +16,7 @@ Y corre main
 
 `python3 main.py`
 
-Ingresa el nombre de usuario y contraseña con la cual entras a omegaUp
+Ingresa el nombre de usuario y constraseña con la cual entras a omegaUp, luego ingresa tu user_id de moss. Puedes obtener uno [aquí](http://theory.stanford.edu/~aiken/moss/)
 
 _Si ingresaste mal tu usuario/contraseña, lo puedes cambiar dentro del archivo generado `login.txt`_
 
