@@ -6,7 +6,7 @@ Esta es una herramienta que permite checar el plagio de código dentro de un con
 
 Para poder usarlo clona este repositorio
 
-`git clone https://github.com/Mau-MD/omegaUp-CPC`
+`git clone https://github.com/Mau-MD/omegaUp-CPC.git`
 
 Instala las dependencias
 
