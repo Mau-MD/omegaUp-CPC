@@ -3,7 +3,7 @@ import omegaup.api
 import sys
 import os
 
-from util import get_credentials_from_file, print_table
+from util import get_credentials_from_file, print_table, path_exists
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -62,7 +62,7 @@ def display_contest_problems(contest_class, contest_alias):
 
     problem_idx = int(input("Enter the problem number: "))
 
-    if problem_idx < 0 or problem_idx >= len(problems["problems"]):
+    if problem_idx < 0 or problem_idx >= len(problems["problems"]) + 1:
         print("Invalid problem number")
         sys.exit(1)
 
@@ -98,13 +98,26 @@ def get_source_from_run(run_class, run_alias):
 
 def save_source_code(runs, problem_alias):
     for username, runs_by_username in runs.items():
-        path = os.path.join(problem_alias, username)
-        os.mkdir(path)
-        for run in runs_by_username:
-            with open(
-                os.path.join(path, run["problem_alias"] + ".cpp"), "w"
-            ) as f:
+        path = os.path.join("generated", problem_alias, username)
+        if not path_exists(path):
+            os.mkdir(path)
+        for idx, run in enumerate(runs_by_username):
+
+            extension = ".txt"
+            language = run["language"]
+            if language.startswith("cpp"):
+                extension = ".cpp"
+            elif language.startswith("py3") or language.startswith("py2"):
+                extension = ".py"
+            elif language.startswith("java"):
+                extension = ".java"
+            elif language.startswith("c"):
+                extension = ".c"
+
+            file_name = f"run{idx}{extension}"
+            with open(os.path.join(path, file_name), "w") as f:
                 f.write(run["source"])
+
 
 def main():
 
@@ -112,7 +125,6 @@ def main():
 
     client_class = omegaup.api.Client(username=username, password=password)
     contest_class = omegaup.api.Contest(client=client_class)
-    user_class = omegaup.api.User(client=client_class)
     run_class = omegaup.api.Run(client=client_class)
 
     contest_alias = display_admin_contests(contest_class)
@@ -121,12 +133,12 @@ def main():
         runs = get_runs_from_problem(
             contest_class, run_class, contest_alias, problem_alias
         )
-        if os.path.exists(problem_alias):
-            os.rmdir(problem_alias) # always have new content
-        os.mkdir(problem_alias)
-
+        if not path_exists("generated"):
+            os.mkdir("generated")
+        if not path_exists("generated", problem_alias):
+            os.mkdir(os.path.join("generated", problem_alias))
         save_source_code(runs, problem_alias)
-    pp.pprint(runs)
+    print("Problems saved! Please check the generated folder")
 
 
 if __name__ == "__main__":

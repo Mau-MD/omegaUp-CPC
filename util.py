@@ -31,3 +31,7 @@ def print_table(rows: list[str]):
             print(str(row[i]).ljust(col_widths[i]), end=" | ")
         print("")
     print("-" * total_width)
+
+
+def path_exists(*args):
+    return os.path.exists(os.path.join(*args))
