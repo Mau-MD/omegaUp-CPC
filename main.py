@@ -81,7 +81,8 @@ def save_source_code(runs, problem_alias):
         path = os.path.join("generated", problem_alias, username)
         if not path_exists(path):
             os.mkdir(path)
-            runs_by_username.reverse()
+
+        runs_by_username.reverse()
         for idx, run in enumerate(
             runs_by_username
         ):  # reverse to get the latest run first
