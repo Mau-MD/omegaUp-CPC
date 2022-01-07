@@ -2,10 +2,12 @@ import pprint
 import omegaup.api
 import sys
 import os
+import math
 
 from util import get_credentials_from_file, print_table, path_exists
 
 pp = pprint.PrettyPrinter(indent=4)
+
 
 def display_admin_contests(contest_class):
     contests = contest_class.adminList()
@@ -61,6 +63,8 @@ def get_runs_from_problem(contest_class, run_class, contest_alias, problem_alias
                 "run_alias": run["guid"],
                 "problem_alias": run["alias"],
                 "language": run["language"],
+                "score": run["score"],
+                "verdict": run["verdict"],
                 "source": get_source_from_run(run_class, run["guid"]),
             }
         )
@@ -77,10 +81,15 @@ def save_source_code(runs, problem_alias):
         path = os.path.join("generated", problem_alias, username)
         if not path_exists(path):
             os.mkdir(path)
-        for idx, run in enumerate(runs_by_username):
+            runs_by_username.reverse()
+        for idx, run in enumerate(
+            runs_by_username
+        ):  # reverse to get the latest run first
 
             extension = ".txt"
             language = run["language"]
+            score = math.floor(run["score"] * 100)
+
             if language.startswith("cpp"):
                 extension = ".cpp"
             elif language.startswith("py3") or language.startswith("py2"):
@@ -90,7 +99,7 @@ def save_source_code(runs, problem_alias):
             elif language.startswith("c"):
                 extension = ".c"
 
-            file_name = f"run{idx}{extension}"
+            file_name = f"{idx}_{run['verdict']}_{score}{extension}"
             with open(os.path.join(path, file_name), "w") as f:
                 f.write(run["source"])
 
