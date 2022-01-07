@@ -7,30 +7,6 @@ from util import get_credentials_from_file, print_table, path_exists
 
 pp = pprint.PrettyPrinter(indent=4)
 
-# token = "ae692f5c7eb54658c3d56883f3640d95dec79a52"
-
-
-# usr = omegaup.api.User(client)
-# contest = omegaup.api.Contest(client)
-
-# adminContests = contest.adminList()
-# contest_alias = adminContests['contests'][0]['alias']
-
-# problems = contest.problems(contest_alias=contest_alias)
-# pp.pprint(problems)
-
-# runs = contest.runs(contest_alias=contest_alias, problem_alias=problems['problems'][0]['alias'])
-# pp.pprint(runs)
-
-
-# run = omegaup.api.Run(client)
-
-# source = run.source(run_alias=runs['runs'][0]['guid'])
-# pp.pprint(source)
-
-# Generar esto en un archivo
-
-
 def display_admin_contests(contest_class):
     contests = contest_class.adminList()
 
