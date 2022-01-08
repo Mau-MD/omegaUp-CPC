@@ -3,7 +3,7 @@ import os.path
 from mosspy import moss
 
 
-def get_credentials_from_file(file_name: str):
+def get_credentials_from_file(file_name):
     """
     Reads the login credentials from the file. If they are not there, then it will ask for them and write them to the file.
     """
@@ -25,7 +25,7 @@ def get_credentials_from_file(file_name: str):
     return username, password, moss_user_id
 
 
-def print_table(rows: list[str]):
+def print_table(rows):
     """
     Prints a table with the given columns.
     """

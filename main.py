@@ -1,4 +1,3 @@
-import pprint
 import omegaup.api
 import sys
 import os
@@ -40,9 +39,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-pp = pprint.PrettyPrinter(indent=4)
-
 
 def display_admin_contests(contest_class):
     contests = contest_class.adminList()
@@ -89,7 +85,7 @@ def display_contest_problems(contest_class, contest_alias):
 def get_runs_from_problem(contest_class, run_class, contest_alias, problem_alias):
     runs = contest_class.runs(contest_alias=contest_alias, problem_alias=problem_alias)
 
-    print(bcolors.BOLD + "\n Getting runs from problem: " + problem_alias + bcolors.ENDC)
+    print(bcolors.BOLD + "\nGetting runs from problem: " + problem_alias + bcolors.ENDC)
     # separate runs by username
     runs_by_username = {}
     for run in runs["runs"]:
@@ -199,7 +195,7 @@ def remove_same_user_matches(report_path, filtered_report_path, problem_alias):
     )
 
 
-def get_user_from_html_line(line, problem_alias) -> str:
+def get_user_from_html_line(line, problem_alias):
     search_index = line.index(problem_alias) + len(problem_alias) + 1
     # Now find the user
     user_index = line.index("/", search_index)
