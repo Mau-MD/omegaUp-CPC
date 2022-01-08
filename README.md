@@ -26,3 +26,6 @@ A continuación sigue las instrucciones.
 
 ## Progreso
 El programa ahorita es totalmente funcional y puedes ver el reporte generado en html:)
+
+## TODO
+Un reporte individual conteniendo todos los lenguajes en vez de un html por lenguaje
