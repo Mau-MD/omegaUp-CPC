@@ -3,6 +3,10 @@ import sys
 import os
 import math
 import mosspy
+from bs4 import BeautifulSoup
+from pybars import Compiler
+from template.template import generate_website
+import pprint
 
 from util import get_credentials_from_file, print_table, path_exists
 
@@ -26,19 +30,21 @@ lang_extension_to_moss = {
     ".py": "python",
     ".java": "java",
     ".pascal": "pascal",
-    ".txt": "ascii"
+    ".txt": "ascii",
 }
 
+
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
 
 def display_admin_contests(contest_class):
     contests = contest_class.adminList()
@@ -117,7 +123,7 @@ def save_source_code(runs, problem_alias):
         path = os.path.join("generated", problem_alias, username)
         if not path_exists(path):
             os.mkdir(path)
-        
+
         runs_by_username.reverse()  # reverse to get the latest run first
         for idx, run in enumerate(runs_by_username):
             language = run["language"]
@@ -145,14 +151,19 @@ def check_plagiarism(moss_user_id, problem_alias):
         m = mosspy.Moss(moss_user_id, moss_lang)
         m.addFilesByWildcard(os.path.join("generated", problem_alias, "*", f"*{ext}"))
 
-        if(len(m.files) == 0):
+        if len(m.files) == 0:
             continue
 
         url = m.send(lambda file_path, display_name: print("*", end="", flush=True))
 
         print()
         print(bcolors.OKGREEN + "OK: " + moss_lang + bcolors.ENDC)
-        print("Unfiltered Online Report (May contain duplicates): " + bcolors.OKCYAN + url + bcolors.ENDC)
+        print(
+            "Unfiltered Online Report (May contain duplicates): "
+            + bcolors.OKCYAN
+            + url
+            + bcolors.ENDC
+        )
 
         if not path_exists("submission"):
             os.mkdir("submission")
@@ -166,7 +177,8 @@ def check_plagiarism(moss_user_id, problem_alias):
         )
         print("The unfiltered report has been saved locally inside: ", report_path)
         m.saveWebPage(url, report_path)
-        remove_same_user_matches(report_path, filtered_report_path, problem_alias) 
+
+        remove_same_user_matches(report_path, filtered_report_path, problem_alias)
         # TODO: integrate all languages responses into same HTML problem
 
 
@@ -202,6 +214,24 @@ def get_user_from_html_line(line, problem_alias):
     return line[search_index:user_index]
 
 
+def bs():
+    html_paths = [
+        {
+            "lang": "cc",
+            "html": os.path.join(
+                "submission", "Sumas-Veleanas_cc_filtered_report.html"
+            ),
+        },
+        {
+            "lang": "py",
+            "html": os.path.join(
+                "submission", "Sumas-Veleanas_python_unfiltered_report.html"
+            ),
+        },
+    ]
+    generate_website(html_paths)
+
+
 def main():
 
     username, password, moss_user_id = get_credentials_from_file("login.txt")
@@ -221,10 +251,9 @@ def main():
         if not path_exists("generated", problem_alias):
             os.mkdir(os.path.join("generated", problem_alias))
         save_source_code(runs, problem_alias)
-        check_plagiarism(
-            moss_user_id, problem_alias
-        )
-        
+        check_plagiarism(moss_user_id, problem_alias)
+
 
 if __name__ == "__main__":
-    main()
+    bs()
+    # main()
