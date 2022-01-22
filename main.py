@@ -3,10 +3,7 @@ import sys
 import os
 import math
 import mosspy
-from bs4 import BeautifulSoup
-from pybars import Compiler
 from template.template import generate_website
-import pprint
 
 from util import get_credentials_from_file, print_table, path_exists
 
@@ -147,6 +144,7 @@ def check_plagiarism(moss_user_id, problem_alias):
 
     print("Sending information to Moss. Please be patient...")
 
+    html_paths = []
     for ext, moss_lang in lang_extension_to_moss.items():
         m = mosspy.Moss(moss_user_id, moss_lang)
         m.addFilesByWildcard(os.path.join("generated", problem_alias, "*", f"*{ext}"))
@@ -179,7 +177,13 @@ def check_plagiarism(moss_user_id, problem_alias):
         m.saveWebPage(url, report_path)
 
         remove_same_user_matches(report_path, filtered_report_path, problem_alias)
-        # TODO: integrate all languages responses into same HTML problem
+        html_paths.append(
+            {
+                "lang": moss_lang,
+                "html": filtered_report_path,
+            },
+        )
+    generate_website(html_paths)
 
 
 def remove_same_user_matches(report_path, filtered_report_path, problem_alias):
@@ -214,19 +218,23 @@ def get_user_from_html_line(line, problem_alias):
     return line[search_index:user_index]
 
 
-def bs():
+def test():
     html_paths = [
         {
+            "lang": "c",
+            "html": "test_files/Sumas-Veleanas_c_filtered_report.html",
+        },
+        {
             "lang": "cc",
-            "html": os.path.join(
-                "submission", "Sumas-Veleanas_cc_filtered_report.html"
-            ),
+            "html": "test_files/Sumas-Veleanas_cc_filtered_report.html",
         },
         {
             "lang": "py",
-            "html": os.path.join(
-                "submission", "Sumas-Veleanas_python_unfiltered_report.html"
-            ),
+            "html": "test_files/Sumas-Veleanas_python_filtered_report.html",
+        },
+        {
+            "lang": "java",
+            "html": "test_files/Sumas-Veleanas_java_filtered_report.html",
         },
     ]
     generate_website(html_paths)
@@ -255,5 +263,10 @@ def main():
 
 
 if __name__ == "__main__":
-    bs()
-    # main()
+
+    if len(sys.argv) < 2:
+        main()
+    if (sys.argv[1]) == "--test":
+        test()
+    else:
+        print("Usage: python3 moss.py [--test]")
