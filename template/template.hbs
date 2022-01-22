@@ -1,0 +1,49 @@
+<!-- results = {lang, results: {link, problem_alias, username, file_name, status}} -->
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container mt-5">
+
+      <h1 class="title">Plagiarism Results</h1>
+      {{#each results}}
+        <h2 class="subtitle mt-5">{{this.lang}}</h1>
+        <table class="table is-hoverable is-fullwidth">
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Usernames</th>
+              <th>File Name</th>
+              <th>Link</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each this.data}}
+              <tr>
+                <td>{{this.problem_alias}}</td>
+                <td>
+                  <div>{{this.usernames[0]}}</div>
+                  <div>{{this.usernames[1]}}</div>
+                </td>
+                <td>
+                  <div>{{this.file_name[0]}}</div>
+                  <div>{{this.file_name[1]}}</div>
+                </td>
+                <td><a href="{{this.link}}">{{this.link}}</a></td>
+                <td>{{this.status}} Match</td>
+              </tr>
+            {{/each}}
+          </tbody>
+
+        </table>
+      {{/each}}
+    </div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  </body>
+</html>

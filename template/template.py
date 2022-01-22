@@ -1,5 +1,6 @@
 from pybars import Compiler
 from bs4 import BeautifulSoup
+from server import start_server
 import os
 
 
@@ -17,19 +18,32 @@ def get_information_from_html(html_path):
         scapper = BeautifulSoup(h, "html.parser")
         a_tags = scapper.find_all("a")
 
-        for tag in a_tags:
-            if "results" in str(tag):  # filter out the results
+        # TODO: group by two
+        for idx in range(0, len(a_tags), 2):
+            tag = a_tags[idx]
+            tag_pair = a_tags[idx + 1]
+
+            if "results" in str(tag) and "results" in str(tag_pair):  # filter out the results
                 link = tag.get("href")
-                information = tag.contents[0]
-                problem_alias, username, file_name, status = get_results_information(
-                    information
+
+                # Process first tag
+                first_tag_information = tag.contents[0]
+                problem_alias, username_1, file_name_1, status = get_results_information(
+                    first_tag_information
                 )
+
+                # Process second tag
+                second_tag_information = tag_pair.contents[0]
+                _, username_2, file_name_2, _ = get_results_information(
+                    second_tag_information
+                )
+
                 results.append(
                     {
                         "link": link,
                         "problem_alias": problem_alias,
-                        "username": username,
-                        "file_name": file_name,
+                        "usernames": (username_1, username_2),
+                        "file_name": (file_name_1, file_name_2),
                         "status": status,
                     }
                 )
@@ -39,9 +53,11 @@ def get_information_from_html(html_path):
 # results = {lang, results: {link, problem_alias, username, file_name, status}}
 def compile_website(results):
     html_compiler = Compiler()
-    with open(os.path.join("template", "template.html"), "r") as t:
+    with open(os.path.join("template", "template.hbs"), "r") as t:
         template = html_compiler.compile("".join(t.readlines()))
         output = template({"results": results})
+        start_server(output)
+
         with open("results.html", "w") as o:
             o.write(output)
 
