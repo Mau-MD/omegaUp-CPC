@@ -1,2 +1,4 @@
 omegaup
 mosspy
+beautifulsoup4
+pybars3
