@@ -2,6 +2,8 @@
 
 Esta es una herramienta que permite checar el plagio de código dentro de un concurso mediante la herramienta de `Moss`
 
+![image](https://user-images.githubusercontent.com/74751751/150657675-c5d4da42-b1c7-47ff-a757-2f7a5a6c8e57.png)
+
 ## Uso
 
 Para poder usarlo clona este repositorio
@@ -24,8 +26,8 @@ A continuación sigue las instrucciones.
 
 **Solo puedes ver los concursos en los que eres admin/creador**
 
-## Progreso
-El programa ahorita es totalmente funcional y puedes ver el reporte generado en html:)
+## Nota
+**Si hay muchos runs que evaluar, Moss puede tardar mucho en generar un reporte final. Se paciente:)**
 
-## TODO
-Un reporte individual conteniendo todos los lenguajes en vez de un html por lenguaje
+## Progreso
+El programa ahorita es totalmente funcional y puedes ver el reporte en `localhost:8080`.  
